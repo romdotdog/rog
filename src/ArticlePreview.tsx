@@ -12,7 +12,7 @@ const ArticlePreview: Component<{ title: string, author: string, keyChecksum: st
             <div class={style.content}>
                 <h2>{title}</h2>
                 <Author author={author} keyChecksum={keyChecksum} class="" />
-                <p>{preview}</p>
+                <p>{preview.replace(/\.*$/, "…")}</p>
             </div>
         </article>
     );
