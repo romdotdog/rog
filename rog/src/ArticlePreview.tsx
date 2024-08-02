@@ -2,6 +2,7 @@ import type { Component } from "solid-js";
 import style from "./ArticlePreview.module.css";
 import Author from "./Author";
 import { useNavigate } from "@solidjs/router";
+import Markdown from "./Markdown";
 
 const ArticlePreview: Component<{ title: string, author: string, keyChecksum: string, preview: string, hash: string, i: number }> = ({ title, author, keyChecksum, preview, hash, i }) => {
     const navigate = useNavigate();
@@ -12,7 +13,7 @@ const ArticlePreview: Component<{ title: string, author: string, keyChecksum: st
             <div class={style.content}>
                 <h2>{title}</h2>
                 <Author author={author} keyChecksum={keyChecksum} class="" />
-                <p>{preview.replace(/\.*$/, "…")}</p>
+                <Markdown value={preview.replace(/\.*$/, "…")} />
             </div>
         </article>
     );

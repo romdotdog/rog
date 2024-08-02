@@ -4,6 +4,7 @@ import Author from "./Author";
 import { createAsync, useLocation, useNavigate, useParams } from "@solidjs/router";
 import { getPost } from "./API";
 import { formatKey, splitTitle } from "./utils";
+import Markdown from "./Markdown";
 
 const ArticleView: Component = () => {
     const params = useParams();
@@ -30,9 +31,9 @@ const ArticleView: Component = () => {
                 <a onClick={goBack} href="#" class={style.back}>
                     ⟵ back
                 </a>
-                <h1>{post()!.title}</h1>
+                <h1 class={style.title}>{post()!.title}</h1>
                 <Author author={post()!.author} keyChecksum={post()!.keyChecksum} class={style.author} />
-                {post()!.content.split("\n\n").map((p) => <p>{p}</p>)}
+                <Markdown value={post()!.content} />
             </div>
         </Show>
     );
