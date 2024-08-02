@@ -8,7 +8,7 @@ const PostForm: Component = () => {
     const [collapsed, setCollapsed] = createSignal(true);
     const [words, setWords] = createSignal(0);
     const [error, setError] = createSignal<string | null>(null);
-    const [working, setWorking] = createSignal(true);
+    const [working, setWorking] = createSignal(false);
 
     const toggleCollapse = (e: MouseEvent) => {
         setCollapsed(!collapsed());
