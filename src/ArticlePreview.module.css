@@ -1,7 +1,6 @@
 .post {
     display: flex;
     align-items: center;
-    margin-left: 10px;
     border-left: 5px solid #575757;
     padding-left: 15px;
     max-width: 760px;
