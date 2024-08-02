@@ -8,6 +8,7 @@ const PostForm: Component = () => {
     const [collapsed, setCollapsed] = createSignal(true);
     const [words, setWords] = createSignal(0);
     const [error, setError] = createSignal<string | null>(null);
+    const [working, setWorking] = createSignal(true);
 
     const toggleCollapse = (e: MouseEvent) => {
         setCollapsed(!collapsed());
@@ -18,15 +19,18 @@ const PostForm: Component = () => {
         setWords((e.target as HTMLInputElement).value.split(" ").filter(x => x.trim()).length);
     };
 
-    const submit = (e: SubmitEvent) => {
+    const submit = async (e: SubmitEvent) => {
         const form = e.target as HTMLFormElement;
         const author = form.displayname.value;
-
-        publishPost(author.trim() || "Anonymous", form.post.value.trim())
-            .then(hash => navigate(`/${hash}`, { state: { back: true } }))
-            .catch(e => setError(e.message));
-
         e.preventDefault();
+
+        try {
+            setWorking(true);
+            const hash = await publishPost(author.trim() || "Anonymous", form.post.value.trim());
+            navigate(`/${hash}`, { state: { back: true } });
+        } catch(e) {
+            setError((e as any).message)
+        }
     };
 
     return (
@@ -48,8 +52,8 @@ const PostForm: Component = () => {
                         <small class={words() > 100 ? style.success : style.fail}>{words()}/100 words</small>
                     </div>
 
-                    <button type="submit" class={style.submitBtn}>
-                        Submit
+                    <button type="submit" class={style.submitBtn} disabled={working()}>
+                        {working() ? "Computing..." : "Submit"}	
                     </button>
 
                     {error() && <div class={style.error}>{error()}</div>}

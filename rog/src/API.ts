@@ -76,11 +76,14 @@ export const getPost = cache(async (hash: string) => {
 export async function publishPost(author: string, content: string): Promise<string> {
     const { privateKey, publicKeyRaw } = await init;
 
-    const signedBuffer = encode({
-        author,
-        content,
-        // TODO: add proof of work
-    });
+    const pow = await import("./pow");
+    const nonce = await pow.default(
+        encode({
+            author,
+            content,
+        })
+    );
+    console.log(nonce);
 
     const signature = await window.crypto.subtle.sign(
         {
@@ -88,7 +91,11 @@ export async function publishPost(author: string, content: string): Promise<stri
             hash: "SHA-256",
         },
         privateKey,
-        signedBuffer
+        encode({
+            author,
+            content,
+            nonce,
+        })
     );
 
     const body = encode({
@@ -96,6 +103,7 @@ export async function publishPost(author: string, content: string): Promise<stri
         content,
         key: publicKeyRaw,
         signature: new Uint8Array(signature),
+        nonce,
     });
 
     const r = await fetch("https://rog-backend.r-om.workers.dev/submit", {

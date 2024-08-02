@@ -1,0 +1,189 @@
+import { encode, decode } from "@msgpack/msgpack";
+import { Buffer } from "node:buffer";
+
+import init, { check } from "../../rogpow-wasm/rogpow";
+import wasm from "../../rogpow-wasm/rogpow_bg.wasm";
+
+const headers = new Headers({
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST",
+});
+
+const msgpack = new Headers({
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST",
+    "Content-Type": "application/x-msgpack",
+});
+
+export default {
+    async fetch(request, env, ctx) {
+        const url = new URL(request.url);
+        const path = url.pathname;
+
+        if (request.method === "OPTIONS") {
+            return new Response(null, { headers });
+        }
+
+        if (path === "/" && request.method === "GET") {
+            return handleFeed(env);
+        } else if (path.startsWith("/post/") && request.method === "GET") {
+            const postId = path.split("/post/").slice(1).join("/post/"); // we want to be proper
+            return handleGetPost(env, postId);
+        } else if (path === "/submit" && request.method === "POST") {
+            return handleSubmit(request, env);
+        } else {
+            return new Response("not found", { status: 404, headers });
+        }
+    },
+} satisfies ExportedHandler<Env>;
+
+async function handleFeed(env: Env) {
+    const { results } = await env.DB.prepare(
+        "SELECT hash, author, keyChecksum, preview, timestamp FROM posts ORDER BY timestamp DESC"
+    ).all();
+
+    for (const post of results) {
+        post.hash = new Uint8Array(post.hash as number[]);
+        post.keyChecksum = new Uint8Array(post.keyChecksum as number[]);
+    }
+
+    return new Response(encode(results), { headers: msgpack });
+}
+
+async function handleGetPost(env: Env, postHashHex: string) {
+    const postHash = Buffer.from(postHashHex, "hex");
+
+    const { results } = await env.DB.prepare("SELECT author, content, key, signature, timestamp FROM posts WHERE hash = ?")
+        .bind(postHash)
+        .all();
+
+    if (results.length > 0) {
+        const post = results[0];
+        post.key = new Uint8Array(post.key as number[]);
+        post.signature = new Uint8Array(post.signature as number[]);
+        return new Response(encode(post), { headers: msgpack });
+    }
+
+    return new Response("not found", { status: 404, headers });
+}
+
+async function handleSubmit(request: Request, env: Env) {
+    const data = await request.arrayBuffer();
+
+    let decodedData: unknown;
+    try {
+        decodedData = decode(data);
+    } catch {
+        return new Response("error parsing data", { status: 400, headers });
+    }
+
+    // Validate data
+    if (!(typeof decodedData === "object" && decodedData !== null)) {
+        return new Response("invalid data", { status: 400, headers });
+    }
+
+    if (!("author" in decodedData && typeof decodedData.author === "string")) {
+        return new Response("author is required", { status: 400, headers });
+    }
+
+    const author = decodedData.author.trim();
+    if (author.length === 0) {
+        return new Response("author is too short", { status: 400, headers });
+    } else if (author.length > 32) {
+        return new Response("author is too long", { status: 400, headers });
+    }
+
+    if (!("content" in decodedData && typeof decodedData.content === "string")) {
+        return new Response("content is required", { status: 400, headers });
+    }
+
+    const content = decodedData.content.trim();
+    if (content.length === 0) {
+        return new Response("content is too short", { status: 400, headers });
+    } else if (content.length > 25000) {
+        return new Response("content is too long", { status: 400, headers });
+    }
+
+    if (!("key" in decodedData && decodedData.key instanceof Uint8Array)) {
+        return new Response("key is required", { status: 400, headers });
+    }
+
+    if (!("signature" in decodedData && decodedData.signature instanceof Uint8Array)) {
+        return new Response("signature is required", { status: 400, headers });
+    }
+
+    if (!("nonce" in decodedData && typeof decodedData.nonce === "number")) {
+        return new Response("nonce is required", { status: 400, headers });
+    }
+
+    // Check word count (yes seriously)
+    if (decodedData.content.split(" ").filter(x => x.trim()).length < 100) {
+        return new Response("content is too short", { status: 400, headers });
+    }
+
+    // TODO: check if title is too long
+
+    const signedBuffer = encode({
+        author,
+        content,
+        nonce: decodedData.nonce,
+    });
+
+    const publicKey = await crypto.subtle.importKey(
+        "raw",
+        decodedData.key,
+        {
+            name: "ECDSA",
+            namedCurve: "P-256",
+        },
+        false,
+        ["verify"]
+    );
+
+    if (!crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, publicKey, decodedData.signature, signedBuffer)) {
+        return new Response("invalid signature", { status: 400, headers });
+    }
+
+    // proof of work
+    const powBuffer = Buffer.from(
+        encode({
+            author,
+            content,
+        })
+    );
+
+    await init(wasm);
+
+    if (!check(powBuffer, decodedData.nonce)) {
+        return new Response("invalid nonce", { status: 400, headers });
+    }
+
+    // Add metadata to the post (e.g., timestamp)
+    const timestamp = Date.now();
+    const postWithMetadata = {
+        author,
+        content,
+        key: decodedData.key,
+        signature: decodedData.signature,
+        timestamp,
+        // TODO: add proof of work
+    };
+
+    const hashBin = await crypto.subtle.digest("SHA-256", encode(postWithMetadata));
+    const keyChecksum = decodedData.key.slice(0, 4);
+
+    const r = /^[^#\s](?:.{0,499}?\n|.{499})/m.exec(decodedData.content);
+    const preview = decodedData.content.substring(0, r ? r.index + r[0].length : 500).trim();
+
+    // Save post to DB
+    await env.DB.prepare(
+        `
+		INSERT OR IGNORE INTO posts (hash, author, content, preview, keyChecksum, key, signature, timestamp)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+	  `
+    )
+        .bind(hashBin, author, content, preview, keyChecksum, decodedData.key, decodedData.signature, timestamp)
+        .run();
+
+    return new Response(hashBin, { headers: msgpack });
+}
