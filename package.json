@@ -1,0 +1,24 @@
+{
+    "name": "vite-template-solid",
+    "version": "0.0.0",
+    "description": "",
+    "type": "module",
+    "scripts": {
+        "start": "vite",
+        "dev": "vite --host",
+        "build": "vite build",
+        "serve": "vite preview"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "solid-devtools": "^0.29.2",
+        "typescript": "^5.3.3",
+        "vite": "^5.0.11",
+        "vite-plugin-solid": "^2.8.2"
+    },
+    "dependencies": {
+        "@msgpack/msgpack": "^3.0.0-beta2",
+        "@solidjs/router": "^0.14.1",
+        "solid-js": "^1.8.11"
+    }
+}

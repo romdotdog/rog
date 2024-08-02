@@ -1,0 +1,26 @@
+.post {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+    border-left: 5px solid #575757;
+    padding-left: 15px;
+    max-width: 760px;
+
+    transform: translateX(0);
+    transition: transform 0.3s ease-out;
+
+    cursor: pointer;
+}
+
+.post:hover {
+    transform: translateX(10px);
+}
+
+.content h2 {
+    font-size: 1.602rem;
+    margin: 0;
+}
+
+.content p {
+    margin: 0;
+}

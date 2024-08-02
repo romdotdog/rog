@@ -1,0 +1,13 @@
+.author {
+    font-size: 1rem;
+    line-height: 30px;
+    color: #a0a0a0;
+    margin: 0 0 10px 0;
+}
+
+.author code {
+    font-size: 0.702rem;
+    font-weight: 400;
+    display: inline-block;
+    transform: translateY(-0.5px);
+}
