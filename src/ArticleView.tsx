@@ -1,14 +1,15 @@
 import { Show, Suspense, type Component } from "solid-js";
 import style from "./ArticleView.module.css";
 import Author from "./Author";
-import { createAsync, useNavigate, useParams } from "@solidjs/router";
+import { createAsync, useLocation, useNavigate, useParams } from "@solidjs/router";
 import { getPost } from "./API";
 import { formatKey, splitTitle } from "./utils";
 
 const ArticleView: Component = () => {
     const params = useParams();
     const navigate = useNavigate();
-    const goBack = () => navigate(-1);
+    const location = useLocation<{ back: boolean }>();
+    const goBack = () => location.state?.back ? navigate(-1) : navigate("/", { state: { back: true } });
 
     getPost(params.hash).then(console.log);
     const post = createAsync(() => 
@@ -22,8 +23,6 @@ const ArticleView: Component = () => {
             };
         })
     );
-
-    console.log(post);
     
     return (
         <Show when={post()} fallback={<p>loading...</p>}>

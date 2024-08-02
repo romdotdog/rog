@@ -21,13 +21,11 @@ const PostForm: Component = () => {
     const submit = (e: SubmitEvent) => {
         const form = e.target as HTMLFormElement;
         const author = form.displayname.value;
-        publishPost(author.trim() || "Anonymous", form.post.value)
-            .then(hash => {
-                navigate(`/${hash}`);
-            })
-            .catch(e => {
-                setError(e.message);
-            });
+
+        publishPost(author.trim() || "Anonymous", form.post.value.trim())
+            .then(hash => navigate(`/${hash}`, { state: { back: true } }))
+            .catch(e => setError(e.message));
+
         e.preventDefault();
     };
 
