@@ -121,6 +121,15 @@ async function handleSubmit(request: Request, env: Env) {
         return new Response("content is too short", { status: 400, headers });
     }
 
+    const [title] = splitTitle(decodedData.content);
+    if (title === null) {
+        return new Response("title is required (first line should be `# title here`)", { status: 400, headers });
+    }
+
+    if (title.length > 100) {
+        return new Response("title is too long", { status: 400, headers });
+    }
+
     // TODO: check if title is too long
 
     const signedBuffer = encode({
@@ -186,4 +195,14 @@ async function handleSubmit(request: Request, env: Env) {
         .run();
 
     return new Response(hashBin, { headers: msgpack });
+}
+
+export function splitTitle(post: string) {
+    const titleRegex = /^# (.+)/m.exec(post);
+
+    if (titleRegex) {
+        return [titleRegex[1], post.slice(titleRegex.index + titleRegex[0].length).trim()];
+    }
+
+    return [null, post];
 }
