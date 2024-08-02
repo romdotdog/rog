@@ -1,10 +1,13 @@
 import { Component, createSignal } from "solid-js";
 import style from "./PostForm.module.css";
 import { publishPost } from "./API";
+import { useNavigate } from "@solidjs/router";
 
 const PostForm: Component = () => {
+    const navigate = useNavigate();
     const [collapsed, setCollapsed] = createSignal(true);
     const [words, setWords] = createSignal(0);
+    const [error, setError] = createSignal<string | null>(null);
 
     const toggleCollapse = (e: MouseEvent) => {
         setCollapsed(!collapsed());
@@ -18,7 +21,13 @@ const PostForm: Component = () => {
     const submit = (e: SubmitEvent) => {
         const form = e.target as HTMLFormElement;
         const author = form.displayname.value;
-        publishPost(author.trim() || "Anonymous", form.post.value);
+        publishPost(author.trim() || "Anonymous", form.post.value)
+            .then(hash => {
+                navigate(`/${hash}`);
+            })
+            .catch(e => {
+                setError(e.message);
+            });
         e.preventDefault();
     };
 
@@ -44,6 +53,8 @@ const PostForm: Component = () => {
                     <button type="submit" class={style.submitBtn}>
                         Submit
                     </button>
+
+                    {error() && <div class={style.error}>{error()}</div>}
                 </form>
             </div>
         </>

@@ -73,7 +73,7 @@ export const getPost = cache(async (hash: string) => {
     return decode(buf) as Post;
 }, "getPost");
 
-export async function publishPost(author: string, content: string) {
+export async function publishPost(author: string, content: string): Promise<string> {
     const { privateKey, publicKeyRaw } = await init;
 
     const signedBuffer = encode({
@@ -98,12 +98,14 @@ export async function publishPost(author: string, content: string) {
         signature: new Uint8Array(signature),
     });
 
-    console.log(decode(body));
-
-    const buf = await fetch("https://rog-backend.r-om.workers.dev/submit", {
+    const r = await fetch("https://rog-backend.r-om.workers.dev/submit", {
         method: "POST",
         body,
-    }).then(r => r.arrayBuffer());
+    });
 
-    console.log(toHex(new Uint8Array(buf)));
+    if (r.status !== 200) {
+        throw new Error(await r.text());
+    }
+
+    return toHex(new Uint8Array(await r.arrayBuffer()));
 }
