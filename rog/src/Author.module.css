@@ -11,3 +11,17 @@
     display: inline-block;
     transform: translateY(-0.5px);
 }
+
+.extraneous {
+    display: inline-block;
+    margin-left: 18px;
+    font-size: 0.79rem;
+}
+
+.dot {
+    padding: 0 .5em;
+}
+
+.dot::after {
+    content: '\00B7'
+}

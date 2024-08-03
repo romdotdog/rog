@@ -50,7 +50,7 @@ const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props)
                     <div class={`${style.formGroup} ${style.required}`}>
                         <label for="post">Post</label>
                         <textarea onInput={updateWords} required id="post" name="post" placeholder="What's on your mind?"></textarea>
-                        <small class={words() > 100 ? style.success : style.fail}>{words()}/100 words</small>
+                        <small class={"robust " + (words() > 100 ? style.success : style.fail)}>{words()}/100 words</small>
                     </div>
 
                     <button type="submit" class={style.submitBtn} disabled={working()}>

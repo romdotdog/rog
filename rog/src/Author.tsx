@@ -8,9 +8,10 @@ dayjs.extend(relativeTime);
 
 const Author: Component<{ author: string, keyChecksum: string, class: string, timestamp: number }> = ({ author, keyChecksum, class: className, timestamp }) => {
     return (
-        <h3 class={`${style.author} ${className}`}>
-            by {author} <code>({keyChecksum})</code>, {dayjs(timestamp).fromNow()}
-        </h3>
+        <div class={`${style.author} ${className}`}>
+            by <b>{author}</b> <code>({keyChecksum})</code>
+            <div class={`robust ${style.extraneous}`}><span>{dayjs(timestamp).fromNow()}</span><span class={style.dot} /><span>0 participating</span></div>
+        </div>
     );
 };
 

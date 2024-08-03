@@ -6,5 +6,6 @@ CREATE TABLE posts (
     keyChecksum BLOB NOT NULL,
     key BLOB NOT NULL,
     signature BLOB NOT NULL,
-    timestamp INTEGER NOT NULL
+    timestamp INTEGER NOT NULL,
+    replyingTo BLOB
 );
