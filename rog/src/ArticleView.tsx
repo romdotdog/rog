@@ -21,6 +21,7 @@ const ArticleView: Component = () => {
                 content,
                 author: post.author,
                 keyChecksum: formatKey(post.key.slice(0, 4)),
+                timestamp: post.timestamp
             };
         })
     );
@@ -32,7 +33,7 @@ const ArticleView: Component = () => {
                     ⟵ back
                 </a>
                 <h1 class={style.title}>{post()!.title}</h1>
-                <Author author={post()!.author} keyChecksum={post()!.keyChecksum} class={style.author} />
+                <Author timestamp={post()!.timestamp} author={post()!.author} keyChecksum={post()!.keyChecksum} class={style.author} />
                 <Markdown value={post()!.content} />
             </div>
         </Show>

@@ -20,7 +20,7 @@ const App: Component = () => {
             <main>
                 {feed()?.map((post, i) => {
                     const [title, content] = splitTitle(post.preview);
-                    return <ArticlePreview title={title} author={post.author} keyChecksum={formatKey(post.keyChecksum)} preview={content} hash={toHex(post.hash)} i={i} />
+                    return <ArticlePreview title={title} author={post.author} keyChecksum={formatKey(post.keyChecksum)} preview={content} hash={toHex(post.hash)} timestamp={post.timestamp} i={i} />
                 })}
             </main>
 
