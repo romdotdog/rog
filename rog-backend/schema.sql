@@ -7,5 +7,6 @@ CREATE TABLE posts (
     key BLOB NOT NULL,
     signature BLOB NOT NULL,
     timestamp INTEGER NOT NULL,
-    replyingTo BLOB
+    participating INTEGER NOT NULL
+    replyingTo BLOB,
 );

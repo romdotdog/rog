@@ -43,6 +43,7 @@ interface PostPreview {
     replyingToPreview?: string;
     keyChecksum: Uint8Array;
     timestamp: number;
+    participating: number;
 }
 
 export const getFeed = cache(async () => {
@@ -58,6 +59,7 @@ interface Post {
     key: Uint8Array;
     signature: Uint8Array;
     timestamp: number;
+    participating: number;
 }
 
 export const getPost = cache(async (hash: string) => {

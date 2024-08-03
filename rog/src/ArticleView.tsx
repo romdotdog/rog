@@ -24,7 +24,8 @@ const ArticleView: Component = () => {
                 replyingTo: post.replyingTo && toHex(post.replyingTo),
                 replyingToPreview: post.replyingToPreview,
                 keyChecksum: formatKey(post.key.slice(0, 4)),
-                timestamp: post.timestamp
+                timestamp: post.timestamp,
+                participating: post.participating
             };
         })
     );
@@ -37,7 +38,7 @@ const ArticleView: Component = () => {
                 </a>
                 <h1 class={style.title}>{post()!.title}</h1>
                 {post()!.replyingTo && <ReplyingTo replyingTo={post()!.replyingTo!} replyingToPreview={post()!.replyingToPreview!} /> }
-                <Author timestamp={post()!.timestamp} author={post()!.author} keyChecksum={post()!.keyChecksum} class={style.author} />
+                <Author timestamp={post()!.timestamp} author={post()!.author} keyChecksum={post()!.keyChecksum} participating={post()!.participating} class={style.author} />
                 <Markdown value={post()!.content} />
                 <PostForm actionName="Reply" replyingTo={params.hash} />
             </div>

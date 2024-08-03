@@ -19,7 +19,7 @@ const App: Component = () => {
 
             <main>
                 {feed()?.map((post, i) => {
-                    return <ArticlePreview replyingTo={post.replyingTo && toHex(post.replyingTo)} replyingToPreview={post.replyingToPreview} author={post.author} keyChecksum={formatKey(post.keyChecksum)} preview={post.preview} hash={toHex(post.hash)} timestamp={post.timestamp} i={i} />
+                    return <ArticlePreview replyingTo={post.replyingTo && toHex(post.replyingTo)} replyingToPreview={post.replyingToPreview} author={post.author} keyChecksum={formatKey(post.keyChecksum)} preview={post.preview} hash={toHex(post.hash)} timestamp={post.timestamp} participating={post.participating} i={i} />
                 })}
             </main>
 

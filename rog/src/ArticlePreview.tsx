@@ -6,7 +6,7 @@ import Markdown from "./Markdown";
 import ReplyingTo from "./ReplyingTo";
 import { splitTitle } from "./utils";
 
-const ArticlePreview: Component<{ preview: string, replyingTo?: string, replyingToPreview?: string, author: string, keyChecksum: string, hash: string, timestamp: number, i: number }> = ({ replyingTo, replyingToPreview, author, keyChecksum, preview, hash, timestamp, i }) => {
+const ArticlePreview: Component<{ preview: string, replyingTo?: string, replyingToPreview?: string, author: string, keyChecksum: string, hash: string, timestamp: number, participating: number, i: number }> = ({ replyingTo, replyingToPreview, author, keyChecksum, preview, hash, timestamp, participating, i }) => {
     const navigate = useNavigate();
     const onClick = () => navigate(`/${hash}`, { state: { back: true } });
 
@@ -17,7 +17,7 @@ const ArticlePreview: Component<{ preview: string, replyingTo?: string, replying
             <div class={style.content}>
                 <h2>{title}</h2>
                 {replyingTo && <ReplyingTo replyingTo={replyingTo} replyingToPreview={replyingToPreview!} /> }
-                <Author timestamp={timestamp} author={author} keyChecksum={keyChecksum} class="" />
+                <Author timestamp={timestamp} author={author} keyChecksum={keyChecksum} participating={participating} class="" />
                 <Markdown value={content.replace(/\.*$/, "…")} />
             </div>
         </article>

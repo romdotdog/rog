@@ -46,6 +46,7 @@ async function handleFeed(env: Env) {
             p.preview, 
             p.timestamp,
             p.replyingTo,
+            p.participating,
             r.preview AS replyingToPreview
         FROM 
             posts p
@@ -79,6 +80,7 @@ async function handleGetPost(env: Env, postHashHex: string) {
             p.signature, 
             p.timestamp, 
             p.replyingTo,
+            p.participating,
             r.preview AS replyingToPreview
         FROM 
             posts p
@@ -234,11 +236,9 @@ async function handleSubmit(request: Request, env: Env) {
     const preview = decodedData.content.substring(0, r ? r.index + r[0].length : 500).trim();
 
     // Save post to DB
-    await env.DB.prepare(
-        `
-		INSERT OR IGNORE INTO posts (hash, author, content, preview, keyChecksum, key, signature, timestamp, replyingTo)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-	  `
+    const { results } = await env.DB.prepare(
+        `INSERT OR IGNORE INTO posts (hash, author, content, preview, keyChecksum, key, signature, timestamp, replyingTo)
+		            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
         .bind(
             hashBin,
@@ -252,6 +252,39 @@ async function handleSubmit(request: Request, env: Env) {
             decodedData.replyingTo ?? null
         )
         .run();
+
+    // if (results.length > 0) {
+    //     await env.DB.prepare(
+    //         `
+    //     WITH RECURSIVE Ancestors AS (
+    //         -- Start with the initial post (the one just inserted)
+    //         SELECT
+    //             hash,
+    //             replyingTo,
+    //             participating
+    //         FROM posts
+    //         WHERE hash = ?
+
+    //         UNION ALL
+
+    //         -- Recursively select the ancestors
+    //         SELECT
+    //             p.hash,
+    //             p.replyingTo,
+    //             p.participating + 1 -- Increment participating count
+    //         FROM posts p
+    //         INNER JOIN Ancestors a ON p.hash = a.replyingTo
+    //     )
+
+    //     UPDATE posts
+    //     SET participating = participating + (
+    //         SELECT SUM(a.participating) FROM Ancestors a WHERE a.replyingTo = posts.hash
+    //     )
+    //     WHERE hash IN (SELECT hash FROM Ancestors);`
+    //     )
+    //         .bind(hashBin)
+    //         .run();
+    // }
 
     return new Response(hashBin, { headers: msgpack });
 }
