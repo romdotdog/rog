@@ -29,6 +29,7 @@ const PostForm: Component = () => {
             const hash = await publishPost(author.trim() || "Anonymous", form.post.value.trim());
             navigate(`/${hash}`, { state: { back: true } });
         } catch(e) {
+            setWorking(false);
             setError((e as any).message)
         }
     };

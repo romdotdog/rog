@@ -1,11 +1,14 @@
 import { cache } from "@solidjs/router";
 import { encode, decode } from "@msgpack/msgpack";
 import { fromHex, toHex } from "./utils";
-
-const algorithm: EcKeyGenParams = {
-    name: "ECDSA",
-    namedCurve: "P-256",
-};
+import {
+    derivePublicKey,
+    exportRawPrivateKey,
+    exportRawPublicKey,
+    generateKeyPair,
+    importPKCS8PrivateKey,
+    importRawPrivateKey,
+} from "./Crypto";
 
 const init = (async () => {
     let privateKey: CryptoKey;
@@ -13,10 +16,10 @@ const init = (async () => {
 
     const storedKey = localStorage.getItem("key");
     if (storedKey) {
-        privateKey = await window.crypto.subtle.importKey("pkcs8", fromHex(storedKey), algorithm, true, ["sign"]);
+        privateKey = await importPKCS8PrivateKey(fromHex(storedKey).buffer);
         publicKey = await derivePublicKey(privateKey);
     } else {
-        const keyPair = await window.crypto.subtle.generateKey(algorithm, true, ["sign", "verify"]);
+        const keyPair = await generateKeyPair();
         privateKey = keyPair.privateKey;
         publicKey = keyPair.publicKey;
 
@@ -26,26 +29,11 @@ const init = (async () => {
 
     return {
         privateKey,
+        privateKeyRaw: await exportRawPrivateKey(privateKey),
         publicKey,
-        publicKeyRaw: new Uint8Array(await window.crypto.subtle.exportKey("raw", publicKey)),
+        publicKeyRaw: await exportRawPublicKey(publicKey),
     };
 })();
-
-// https://stackoverflow.com/questions/56807959/generate-public-key-from-private-key-using-webcrypto-api
-async function derivePublicKey(privateKey: CryptoKey) {
-    const jwk = await crypto.subtle.exportKey("jwk", privateKey);
-
-    // remove private data from JWK
-    delete jwk.d;
-    delete jwk.dp;
-    delete jwk.dq;
-    delete jwk.q;
-    delete jwk.qi;
-    jwk.key_ops = ["verify"];
-
-    // import public key
-    return await crypto.subtle.importKey("jwk", jwk, algorithm, true, ["verify"]);
-}
 
 interface PostPreview {
     hash: Uint8Array;
@@ -74,7 +62,7 @@ export const getPost = cache(async (hash: string) => {
 }, "getPost");
 
 export async function publishPost(author: string, content: string): Promise<string> {
-    const { privateKey, publicKeyRaw } = await init;
+    const { privateKeyRaw } = await init;
 
     const pow = await import("./pow");
     const nonce = await pow.default(
@@ -85,6 +73,24 @@ export async function publishPost(author: string, content: string): Promise<stri
     );
     console.log(nonce);
 
+    // assume low entropy because why not
+    const pbkdf2Data = await window.crypto.subtle.importKey("raw", privateKeyRaw, "PBKDF2", false, ["deriveBits"]);
+
+    const privateKey = await window.crypto.subtle
+        .deriveBits(
+            {
+                name: "PBKDF2",
+                salt: await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(author)),
+                iterations: 100000,
+                hash: "SHA-256",
+            },
+            pbkdf2Data,
+            256
+        )
+        .then(importRawPrivateKey);
+
+    const publicKey = await derivePublicKey(privateKey).then(exportRawPublicKey);
+    console.log(publicKey);
     const signature = await window.crypto.subtle.sign(
         {
             name: "ECDSA",
@@ -101,7 +107,7 @@ export async function publishPost(author: string, content: string): Promise<stri
     const body = encode({
         author,
         content,
-        key: publicKeyRaw,
+        key: new Uint8Array(publicKey),
         signature: new Uint8Array(signature),
         nonce,
     });
