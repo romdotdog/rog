@@ -132,11 +132,11 @@ export function parseInline(tokens: Token[] = []): JSX.Element {
             }
 
             case "del": {
-                return <del>parseInline(token.tokens)</del>;
+                return <del>{parseInline(token.tokens)}</del>;
             }
 
             case "codespan": {
-                return <code>parseInline(token.tokens)</code>;
+                return <code>{token.text}</code>;
             }
 
             case "inlineKatex": {
