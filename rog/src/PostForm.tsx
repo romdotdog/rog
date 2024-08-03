@@ -3,7 +3,7 @@ import style from "./PostForm.module.css";
 import { publishPost } from "./API";
 import { useNavigate } from "@solidjs/router";
 
-const PostForm: Component = () => {
+const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props) => {
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = createSignal(true);
     const [words, setWords] = createSignal(0);
@@ -26,7 +26,7 @@ const PostForm: Component = () => {
 
         try {
             setWorking(true);
-            const hash = await publishPost(author.trim() || "Anonymous", form.post.value.trim());
+            const hash = await publishPost(author.trim() || "Anonymous", form.post.value.trim(), props.replyingTo);
             navigate(`/${hash}`, { state: { back: true } });
         } catch(e) {
             setWorking(false);
@@ -37,7 +37,7 @@ const PostForm: Component = () => {
     return (
         <>
             <a href="#" onClick={toggleCollapse} class={style.postBtn}>
-                {collapsed() ? "Post" : "Collapse"}
+                {collapsed() ? props.actionName : "Collapse"}
             </a>
 
             <div class={style.formContainer} style={{ display: collapsed() ? "none" : "block" }}>

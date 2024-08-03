@@ -136,11 +136,11 @@ export function parseInline(tokens: Token[] = []): JSX.Element {
             }
 
             case "codespan": {
-                return <code>{token.text}</code>;
+                return <code>{unescape(token.text)}</code>;
             }
 
             case "inlineKatex": {
-                return <InlineMath value={token.text} />;
+                return <InlineMath value={unescape(token.text)} />;
             }
 
             case "link": {
@@ -148,7 +148,7 @@ export function parseInline(tokens: Token[] = []): JSX.Element {
             }
 
             case "image": {
-                return <img src={token.href} alt={token.text} title={token.title} />;
+                return <img src={token.href} alt={unescape(token.text)} title={unescape(token.title)} />;
             }
 
             case "escape": 

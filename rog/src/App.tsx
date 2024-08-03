@@ -9,18 +9,17 @@ import { getFeed } from "./API";
 import { formatKey, splitTitle, toHex } from "./utils";
 
 const App: Component = () => {
-    const feed = createAsync(() => getFeed());
+    const feed = createAsync(() => getFeed().then(r => (console.log(r), r)));
 
     return (
         <div class={style.container}>
             <Header />
 
-            <PostForm />
+            <PostForm actionName="Post" />
 
             <main>
                 {feed()?.map((post, i) => {
-                    const [title, content] = splitTitle(post.preview);
-                    return <ArticlePreview title={title} author={post.author} keyChecksum={formatKey(post.keyChecksum)} preview={content} hash={toHex(post.hash)} timestamp={post.timestamp} i={i} />
+                    return <ArticlePreview replyingTo={post.replyingTo && toHex(post.replyingTo)} replyingToPreview={post.replyingToPreview} author={post.author} keyChecksum={formatKey(post.keyChecksum)} preview={post.preview} hash={toHex(post.hash)} timestamp={post.timestamp} i={i} />
                 })}
             </main>
 

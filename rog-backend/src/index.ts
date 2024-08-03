@@ -39,12 +39,30 @@ export default {
 
 async function handleFeed(env: Env) {
     const { results } = await env.DB.prepare(
-        "SELECT hash, author, keyChecksum, preview, timestamp FROM posts ORDER BY timestamp DESC"
+        `SELECT 
+            p.hash, 
+            p.author, 
+            p.keyChecksum, 
+            p.preview, 
+            p.timestamp,
+            p.replyingTo,
+            r.preview AS replyingToPreview
+        FROM 
+            posts p
+        LEFT JOIN 
+            posts r
+        ON 
+            p.replyingTo = r.hash
+        ORDER BY 
+            p.timestamp DESC`
     ).all();
 
     for (const post of results) {
         post.hash = new Uint8Array(post.hash as number[]);
         post.keyChecksum = new Uint8Array(post.keyChecksum as number[]);
+        if (post.replyingTo) {
+            post.replyingTo = new Uint8Array(post.replyingTo as number[]);
+        }
     }
 
     return new Response(encode(results), { headers: msgpack });
@@ -53,7 +71,24 @@ async function handleFeed(env: Env) {
 async function handleGetPost(env: Env, postHashHex: string) {
     const postHash = Buffer.from(postHashHex, "hex");
 
-    const { results } = await env.DB.prepare("SELECT author, content, key, signature, timestamp FROM posts WHERE hash = ?")
+    const { results } = await env.DB.prepare(
+        `SELECT 
+            p.author, 
+            p.content, 
+            p.key, 
+            p.signature, 
+            p.timestamp, 
+            p.replyingTo,
+            r.preview AS replyingToPreview
+        FROM 
+            posts p
+        LEFT JOIN 
+            posts r
+        ON 
+            p.replyingTo = r.hash
+        WHERE 
+            p.hash = ?;`
+    )
         .bind(postHash)
         .all();
 
@@ -61,6 +96,9 @@ async function handleGetPost(env: Env, postHashHex: string) {
         const post = results[0];
         post.key = new Uint8Array(post.key as number[]);
         post.signature = new Uint8Array(post.signature as number[]);
+        if (post.replyingTo) {
+            post.replyingTo = new Uint8Array(post.replyingTo as number[]);
+        }
         return new Response(encode(post), { headers: msgpack });
     }
 
@@ -70,9 +108,9 @@ async function handleGetPost(env: Env, postHashHex: string) {
 async function handleSubmit(request: Request, env: Env) {
     const data = await request.arrayBuffer();
 
-    let decodedData: unknown;
+    let decodedData;
     try {
-        decodedData = decode(data);
+        decodedData = decode(data) as { replyingTo?: Uint8Array };
     } catch {
         return new Response("error parsing data", { status: 400, headers });
     }
@@ -114,6 +152,10 @@ async function handleSubmit(request: Request, env: Env) {
 
     if (!("nonce" in decodedData && typeof decodedData.nonce === "number")) {
         return new Response("nonce is required", { status: 400, headers });
+    }
+
+    if ("replyingTo" in decodedData && !(decodedData.replyingTo instanceof Uint8Array)) {
+        return new Response("replyingTo is not a buffer", { status: 400, headers });
     }
 
     // Check word count (yes seriously)
@@ -167,6 +209,13 @@ async function handleSubmit(request: Request, env: Env) {
         return new Response("invalid nonce", { status: 400, headers });
     }
 
+    if (decodedData.replyingTo) {
+        const { results } = await env.DB.prepare(`SELECT 1 FROM posts WHERE hash = ? LIMIT 1;`).bind(decodedData.replyingTo).all();
+        if (results.length === 0) {
+            return new Response("the post you are replying to does not exist", { status: 400, headers });
+        }
+    }
+
     // Add metadata to the post (e.g., timestamp)
     const timestamp = Date.now();
     const postWithMetadata = {
@@ -187,11 +236,21 @@ async function handleSubmit(request: Request, env: Env) {
     // Save post to DB
     await env.DB.prepare(
         `
-		INSERT OR IGNORE INTO posts (hash, author, content, preview, keyChecksum, key, signature, timestamp)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT OR IGNORE INTO posts (hash, author, content, preview, keyChecksum, key, signature, timestamp, replyingTo)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 	  `
     )
-        .bind(hashBin, author, content, preview, keyChecksum, decodedData.key, decodedData.signature, timestamp)
+        .bind(
+            hashBin,
+            author,
+            content,
+            preview,
+            keyChecksum,
+            decodedData.key,
+            decodedData.signature,
+            timestamp,
+            decodedData.replyingTo ?? null
+        )
         .run();
 
     return new Response(hashBin, { headers: msgpack });

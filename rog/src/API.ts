@@ -39,6 +39,8 @@ interface PostPreview {
     hash: Uint8Array;
     author: string;
     preview: string;
+    replyingTo?: Uint8Array;
+    replyingToPreview?: string;
     keyChecksum: Uint8Array;
     timestamp: number;
 }
@@ -51,6 +53,8 @@ export const getFeed = cache(async () => {
 interface Post {
     author: string;
     content: string;
+    replyingTo?: Uint8Array;
+    replyingToPreview?: string;
     key: Uint8Array;
     signature: Uint8Array;
     timestamp: number;
@@ -61,7 +65,7 @@ export const getPost = cache(async (hash: string) => {
     return decode(buf) as Post;
 }, "getPost");
 
-export async function publishPost(author: string, content: string): Promise<string> {
+export async function publishPost(author: string, content: string, replyingTo?: string): Promise<string> {
     const { privateKeyRaw } = await init;
 
     const pow = await import("./pow");
@@ -71,7 +75,6 @@ export async function publishPost(author: string, content: string): Promise<stri
             content,
         })
     );
-    console.log(nonce);
 
     // assume low entropy because why not
     const pbkdf2Data = await window.crypto.subtle.importKey("raw", privateKeyRaw, "PBKDF2", false, ["deriveBits"]);
@@ -110,6 +113,7 @@ export async function publishPost(author: string, content: string): Promise<stri
         key: new Uint8Array(publicKey),
         signature: new Uint8Array(signature),
         nonce,
+        ...(replyingTo ? { replyingTo: fromHex(replyingTo) } : {}),
     });
 
     const r = await fetch("https://rog-backend.r-om.workers.dev/submit", {
