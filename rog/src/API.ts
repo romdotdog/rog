@@ -93,7 +93,6 @@ export async function publishPost(author: string, content: string, replyingTo?: 
         .then(importRawPrivateKey);
 
     const publicKey = await derivePublicKey(privateKey).then(exportRawPublicKey);
-    console.log(publicKey);
     const signature = await window.crypto.subtle.sign(
         {
             name: "ECDSA",

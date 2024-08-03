@@ -10,7 +10,6 @@ export function generateKeyPair() {
 }
 
 export async function importPKCS8PrivateKey(key: ArrayBuffer, raw?: ArrayBuffer, error = false) {
-    console.log(toHex(new Uint8Array(key)));
     try {
         return await window.crypto.subtle.importKey("pkcs8", key, algorithm, true, ["sign"]);
     } catch (e) {
@@ -22,14 +21,12 @@ export async function importPKCS8PrivateKey(key: ArrayBuffer, raw?: ArrayBuffer,
         // firefox doesn't allow importing pkcs8 without public key
         const elliptic = await import("elliptic");
         if (raw === undefined) {
-            console.log("aa" + key);
             raw = readPKCS8PrivateKey(key);
         }
 
         const ec = new elliptic.ec("p256");
         const keyPair = ec.keyFromPrivate(new Uint8Array(raw));
         const publicKey = new Uint8Array(keyPair.getPublic().encode("array", false));
-        console.log("public key", toHex(publicKey));
         const newKey = writePKCS8(raw, publicKey.buffer);
         return importPKCS8PrivateKey(newKey, raw, true);
     }
@@ -37,7 +34,6 @@ export async function importPKCS8PrivateKey(key: ArrayBuffer, raw?: ArrayBuffer,
 
 export function importRawPrivateKey(key: ArrayBuffer) {
     const pkcs8Key = writePKCS8(key);
-    console.log(toHex(new Uint8Array(pkcs8Key)));
     return importPKCS8PrivateKey(pkcs8Key);
 }
 
