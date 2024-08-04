@@ -7,6 +7,8 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
     "test": "vitest",
+    "configure-db": "wrangler d1 execute rog --local --file=./schema.sql",
+    "drop-db": "wrangler d1 execute rog --local --command='DROP TABLE IF EXISTS posts'",
     "cf-typegen": "wrangler types"
   },
   "devDependencies": {

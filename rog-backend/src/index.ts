@@ -253,36 +253,6 @@ async function handleSubmit(request: Request, env: Env) {
         )
         .run();
 
-    // If there are colliding hashes this could potentially lead to problems
-    await env.DB.prepare(
-        `WITH RECURSIVE Ancestors AS (
-            -- Start with the initial post (the one just inserted)
-            SELECT
-                hash,
-                replyingTo,
-                participating
-            FROM posts
-            WHERE hash = ?
-
-            UNION ALL
-
-            -- Recursively select the ancestors
-            SELECT
-                p.hash,
-                p.replyingTo,
-                p.participating + 1 -- Increment participating count
-            FROM posts p
-            INNER JOIN Ancestors a ON p.hash = a.replyingTo
-        )
-
-        UPDATE posts
-        SET participating = Ancestors.participating
-        FROM Ancestors
-        WHERE posts.hash = Ancestors.hash;`
-    )
-        .bind(hashBin)
-        .run();
-
     return new Response(hashBin, { headers: msgpack });
 }
 

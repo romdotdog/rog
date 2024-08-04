@@ -24,7 +24,10 @@ const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props)
     };
 
     const save = localStorage.getItem("words");
-    if (save) {
+    if (import.meta.env.VITE_PREFILL === "true") {
+        textarea.value = "# an example post\n\n" + "filler ".repeat(100);
+        updateWords();
+    } else if (save) {
         textarea.value = save;
         updateWords();
     }

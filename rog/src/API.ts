@@ -10,6 +10,11 @@ import {
     importRawPrivateKey,
 } from "./Crypto";
 
+const backend = import.meta.env.VITE_BACKEND;
+if (!backend) {
+    throw new Error("missing BACKEND env variable");
+}
+
 const init = (async () => {
     let privateKey: CryptoKey;
     let publicKey: CryptoKey;
@@ -47,7 +52,7 @@ interface PostPreview {
 }
 
 export const getFeed = cache(async () => {
-    const buf = await fetch("https://rog-backend.r-om.workers.dev").then(r => r.arrayBuffer());
+    const buf = await fetch(backend).then(r => r.arrayBuffer());
     return decode(buf) as PostPreview[];
 }, "getFeed");
 
@@ -63,7 +68,7 @@ interface Post {
 }
 
 export const getPost = cache(async (hash: string) => {
-    const buf = await fetch(`https://rog-backend.r-om.workers.dev/post/${hash}`).then(r => r.arrayBuffer());
+    const buf = await fetch(`${backend}/post/${hash}`).then(r => r.arrayBuffer());
     return decode(buf) as Post;
 }, "getPost");
 
@@ -117,7 +122,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
         ...(replyingTo ? { replyingTo: fromHex(replyingTo) } : {}),
     });
 
-    const r = await fetch("https://rog-backend.r-om.workers.dev/submit", {
+    const r = await fetch(`${backend}/submit`, {
         method: "POST",
         body,
     });
