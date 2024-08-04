@@ -38,6 +38,7 @@ const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props)
             setWorking(true);
             const hash = await publishPost(author.trim() || "Anonymous", form.post.value.trim(), props.replyingTo);
             navigate(`/${hash}`, { state: { back: true } });
+            localStorage.setItem("words", "");
         } catch(e) {
             setWorking(false);
             setError((e as any).message)
