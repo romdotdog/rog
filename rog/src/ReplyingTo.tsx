@@ -7,7 +7,7 @@ const ReplyingTo: Component<{ replyingTo: string, replyingToPreview: string }> =
     const [title] = splitTitle(replyingToPreview);
     return (
         <div class={`robust ${style.replyingTo}`}>
-            Re: <A href={`/${replyingTo}`}>{title}</A>
+            Re: <A onClick={e => e.stopPropagation()} href={`/${replyingTo}`}>{title}</A>
         </div>
     );
 };

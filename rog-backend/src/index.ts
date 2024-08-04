@@ -236,7 +236,7 @@ async function handleSubmit(request: Request, env: Env) {
     const preview = decodedData.content.substring(0, r ? r.index + r[0].length : 500).trim();
 
     // Save post to DB
-    const { results } = await env.DB.prepare(
+    await env.DB.prepare(
         `INSERT OR IGNORE INTO posts (hash, author, content, preview, keyChecksum, key, signature, timestamp, replyingTo)
 		            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
