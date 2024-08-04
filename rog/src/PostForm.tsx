@@ -10,14 +10,24 @@ const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props)
     const [error, setError] = createSignal<string | null>(null);
     const [working, setWorking] = createSignal(false);
 
+
     const toggleCollapse = (e: MouseEvent) => {
         setCollapsed(!collapsed());
         e.preventDefault();
     };
 
-    const updateWords = (e: InputEvent) => {
-        setWords((e.target as HTMLInputElement).value.split(" ").filter(x => x.trim()).length);
+    const textarea = <textarea onInput={updateWords} required id="post" name="post" placeholder="What's on your mind?" /> as HTMLTextAreaElement;
+    function updateWords() {
+        const value = textarea.value;
+        localStorage.setItem("words", value);
+        setWords(value.split(" ").filter(x => x.trim()).length);
     };
+
+    const save = localStorage.getItem("words");
+    if (save) {
+        textarea.value = save;
+        updateWords();
+    }
 
     const submit = async (e: SubmitEvent) => {
         const form = e.target as HTMLFormElement;
@@ -49,7 +59,7 @@ const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props)
 
                     <div class={`${style.formGroup} ${style.required}`}>
                         <label for="post">Post</label>
-                        <textarea onInput={updateWords} required id="post" name="post" placeholder="What's on your mind?"></textarea>
+                        {textarea}
                         <small class={"robust " + (words() > 100 ? style.success : style.fail)}>{words()}/100 words</small>
                     </div>
 
