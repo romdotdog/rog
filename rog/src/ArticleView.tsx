@@ -16,6 +16,7 @@ const ArticleView: Component = () => {
 
     const post = createAsync(() => 
         getPost(params.hash).then(post => {
+            console.log(post);
             const [title, content] = splitTitle(post.content);
             return {
                 title,

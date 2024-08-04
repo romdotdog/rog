@@ -16,19 +16,12 @@ if ((import.meta as any).env.DEV && !(root instanceof HTMLElement)) {
 const App = lazy(() => import("./App"));
 const ArticleView = lazy(() => import("./ArticleView"));
 
-function preloadFeed() {
-    void getFeed();
-}
-
-function preloadPost({ params }: RoutePreloadFuncArgs) {
-    void getPost(params.hash);
-}
 
 render(
     () => (
         <Router>
-            <Route path="/" component={App} preload={preloadFeed} />
-            <Route path="/:hash" component={ArticleView} preload={preloadPost} />
+            <Route path="/" component={App} />
+            <Route path="/:hash" component={ArticleView}  />
         </Router>
     ),
     root!,

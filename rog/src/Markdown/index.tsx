@@ -7,9 +7,8 @@ import markedKatex from "marked-katex-extension";
 
 marked.use(markedKatex());
 
-const Markdown: Component<{ value: string }> = ({ value }) => {
-    const tokens = marked.lexer(value);
-    return parse(tokens);
+const Markdown: Component<{ value: string }> = (props) => {
+    return <>{parse(marked.lexer(props.value))}</>;
 };
 
 export default Markdown;
