@@ -9,7 +9,7 @@ export function splitTitle(post: string) {
 }
 
 export function formatKey(key: Uint8Array) {
-    return toHex(key).slice(2, 9);
+    return toHex(key).slice(0, 7);
 }
 
 export function toHex(buffer: Uint8Array) {
