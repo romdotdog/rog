@@ -46,7 +46,7 @@ async function handleFeed(env: Env) {
         `SELECT 
             p.hash, 
             p.author, 
-            substr(p.key, 2, 5) AS keyChecksum, 
+            substr(p.key, 1, 5) AS keyChecksum, 
             p.preview, 
             p.timestamp,
             p.replyingTo,
