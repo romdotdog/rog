@@ -1,11 +1,11 @@
-export function splitTitle(post: string) {
+export function splitTitle(post: string): [string | null, string] {
     const titleRegex = /^# (.+)/m.exec(post);
 
     if (titleRegex) {
         return [titleRegex[1], post.slice(titleRegex.index + titleRegex[0].length).trim()];
     }
 
-    return ["[unknown title]", post];
+    return [null, post];
 }
 
 export function formatKey(key: Uint8Array) {

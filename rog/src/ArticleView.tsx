@@ -10,7 +10,7 @@ import ReplyingTo from "./ReplyingTo";
 
 interface Props {
     hash?: string;
-    title: string;
+    title?: string | null;
     content: string;
     author: string;
     replyingTo?: string;
@@ -31,7 +31,7 @@ const ArticleView: Component<Props> = post => {
                 ⟵ back
             </a>
             <h1 class={style.title} style={post.participating ? glow(post.participating, post.timestamp) : ""}>
-                {post.title}
+                {post.title ?? "[unknown title]"}
             </h1>
             {post.replyingTo && <ReplyingTo replyingTo={post.replyingTo} replyingToPreview={post.replyingToPreview!} />}
             <Author

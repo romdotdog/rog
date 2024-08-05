@@ -13,7 +13,7 @@ const ArticleLoader: Component = () => {
             const [title, content] = splitTitle(post.content);
             return {
                 hash: params.hash,
-                title,
+                title: title,
                 content,
                 author: post.author,
                 replyingTo: post.replyingTo && toHex(post.replyingTo),

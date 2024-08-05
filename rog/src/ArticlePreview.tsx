@@ -25,7 +25,7 @@ const ArticlePreview: Component<{
     return (
         <article onClick={onClick} class={style.post} style={`--i: ${props.i};`}>
             <div class={style.content}>
-                <h2 style={`${glow(props.participating, props.timestamp)}`}>{title}</h2>
+                <h2 style={`${glow(props.participating, props.timestamp)}`}>{title ?? "[unknown title]"}</h2>
                 <Show when={props.replyingTo}>
                     <ReplyingTo replyingTo={props.replyingTo!} replyingToPreview={props.replyingToPreview!} />
                 </Show>

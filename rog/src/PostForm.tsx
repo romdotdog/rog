@@ -2,6 +2,7 @@ import { Component, createSignal } from "solid-js";
 import style from "./PostForm.module.css";
 import { publishPost } from "./API";
 import { useNavigate } from "@solidjs/router";
+import { splitTitle } from "./utils";
 
 const PostForm: Component<{ actionName: string; replyingTo?: string }> = props => {
     const navigate = useNavigate();
@@ -38,9 +39,15 @@ const PostForm: Component<{ actionName: string; replyingTo?: string }> = props =
         const author = form.displayname.value;
         e.preventDefault();
 
+        const content = form.post.value.trim();
+        const [title] = splitTitle(content);
+        if (title === null) {
+            return setError("title is required (first line should be `# title here`)");
+        }
+
         try {
             setWorking(true);
-            const hash = await publishPost(author.trim() || "Anonymous", form.post.value.trim(), props.replyingTo);
+            const hash = await publishPost(author.trim() || "Anonymous", content, props.replyingTo);
             navigate(`/${hash}`, { state: { back: true } });
             textarea.value = "";
             updateWords();
