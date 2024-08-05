@@ -3,25 +3,26 @@ import style from "./PostForm.module.css";
 import { publishPost } from "./API";
 import { useNavigate } from "@solidjs/router";
 
-const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props) => {
+const PostForm: Component<{ actionName: string; replyingTo?: string }> = props => {
     const navigate = useNavigate();
     const [collapsed, setCollapsed] = createSignal(true);
     const [words, setWords] = createSignal(0);
     const [error, setError] = createSignal<string | null>(null);
     const [working, setWorking] = createSignal(false);
 
-
     const toggleCollapse = (e: MouseEvent) => {
         setCollapsed(!collapsed());
         e.preventDefault();
     };
 
-    const textarea = <textarea onInput={updateWords} required id="post" name="post" placeholder="What's on your mind?" /> as HTMLTextAreaElement;
+    const textarea = (
+        <textarea onInput={updateWords} required id="post" name="post" placeholder="What's on your mind?" />
+    ) as HTMLTextAreaElement;
     function updateWords() {
         const value = textarea.value;
         localStorage.setItem("words", value);
         setWords(value.split(" ").filter(x => x.trim()).length);
-    };
+    }
 
     const save = localStorage.getItem("words");
     if (import.meta.env.VITE_PREFILL === "true") {
@@ -41,10 +42,14 @@ const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props)
             setWorking(true);
             const hash = await publishPost(author.trim() || "Anonymous", form.post.value.trim(), props.replyingTo);
             navigate(`/${hash}`, { state: { back: true } });
-            localStorage.setItem("words", "");
-        } catch(e) {
+            textarea.value = "";
+            updateWords();
+            setCollapsed(true);
+            setError(null);
+        } catch (e) {
+            setError((e as any).message);
+        } finally {
             setWorking(false);
-            setError((e as any).message)
         }
     };
 
@@ -68,7 +73,7 @@ const PostForm: Component<{ actionName: string, replyingTo?: string }> = (props)
                     </div>
 
                     <button type="submit" class={style.submitBtn} disabled={working()}>
-                        {working() ? "Computing..." : "Submit"}	
+                        {working() ? "Computing..." : "Submit"}
                     </button>
 
                     {error() && <div class={style.error}>{error()}</div>}

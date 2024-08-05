@@ -6,7 +6,7 @@ Welcome to the rog, an experiment in public, anonymous blogging. The architectur
 
 ## Public keys and signatures
 
-Every post on this platform is cryptographically signed. When you see an author attributed as "by Author \`(1ba34e)\`," the characters within the parentheses represent a **key checksum**—a fragment of the author's **public key**. This public key is a unique cryptographic identifier, which varies depending on the display name chosen by the user, but stays the same across posts.
+Every post on this platform is cryptographically signed. When you see an author attributed as "by Author \`(1ba34e4)\`," the characters within the parentheses represent a **key checksum**—a fragment of the author's **public key**. This public key is a unique cryptographic identifier, which varies depending on the display name chosen by the user, but stays the same across posts.
 
 It's important to note that the checksum is only part of the user's public key. While it is theoretically possible to "mine" public keys to match another user's checksum, this would only mimic the checksum itself, not the complete public key. Hence, it is worth checking the full public key when the authorship of a post is important.
 
