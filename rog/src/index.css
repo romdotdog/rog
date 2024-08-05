@@ -13,3 +13,7 @@ body {
 .robust {
     font-family: "EB Garamond", serif;
 }
+
+code {
+    font-family: "Source Code Pro", monospace;
+}

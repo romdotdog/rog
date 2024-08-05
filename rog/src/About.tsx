@@ -12,7 +12,7 @@ It's important to note that the checksum is only part of the user's public key. 
 
 ## Proof of work
 
-When you submit a post, your browser performs some additional computational effort in order to prevent spam. This computational effort, indicated by the "Computing..." prompt, involves solving a mathematical puzzle, that is difficult to solve, but easy to verify.
+When you submit a post, your browser performs some additional computational effort in order to prevent spam. This computational effort, indicated by the "Computing..." prompt, involves solving a mathematical puzzle that is difficult to solve but easy to verify.
 
 ## Notifications for Brave
 
