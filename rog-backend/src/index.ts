@@ -222,15 +222,11 @@ async function handleSubmit(request: Request, env: Env) {
         }
     }
 
-    // Add metadata to the post (e.g., timestamp)
-    const timestamp = Date.now();
     const postWithMetadata = {
         author,
         content,
         key: decodedData.key,
-        signature: decodedData.signature,
-        timestamp,
-        // TODO: add proof of work
+        nonce: decodedData.nonce,
     };
 
     const hashBin = await crypto.subtle.digest("SHA-256", encode(postWithMetadata));
@@ -239,6 +235,7 @@ async function handleSubmit(request: Request, env: Env) {
     const preview = decodedData.content.substring(0, r ? r.index + r[0].length : 500).trim();
 
     // Save post to DB
+    const timestamp = Date.now();
     await env.DB.prepare(
         `INSERT OR IGNORE INTO posts (hash, author, content, preview, key, signature, timestamp, replyingTo)
 		            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
