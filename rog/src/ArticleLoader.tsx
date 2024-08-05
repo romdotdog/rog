@@ -12,6 +12,7 @@ const ArticleLoader: Component = () => {
             console.log(post);
             const [title, content] = splitTitle(post.content);
             return {
+                hash: params.hash,
                 title,
                 content,
                 author: post.author,
