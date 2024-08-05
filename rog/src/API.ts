@@ -16,28 +16,17 @@ if (!backend) {
 }
 
 const init = (async () => {
-    let privateKey: CryptoKey;
-    let publicKey: CryptoKey;
+    let root: Uint8Array;
 
-    const storedKey = localStorage.getItem("key");
-    if (storedKey) {
-        privateKey = await importPKCS8PrivateKey(fromHex(storedKey).buffer);
-        publicKey = await derivePublicKey(privateKey);
+    const storedRoot = localStorage.getItem("root");
+    if (storedRoot) {
+        root = fromHex(storedRoot);
     } else {
-        const keyPair = await generateKeyPair();
-        privateKey = keyPair.privateKey;
-        publicKey = keyPair.publicKey;
-
-        const buf = await window.crypto.subtle.exportKey("pkcs8", privateKey);
-        localStorage.setItem("key", toHex(new Uint8Array(buf)));
+        root = crypto.getRandomValues(new Uint8Array(32));
+        localStorage.setItem("root", toHex(root));
     }
 
-    return {
-        privateKey,
-        privateKeyRaw: await exportRawPrivateKey(privateKey),
-        publicKey,
-        publicKeyRaw: await exportRawPublicKey(publicKey),
-    };
+    return root;
 })();
 
 interface PostPreview {
@@ -73,7 +62,7 @@ export const getPost = cache(async (hash: string) => {
 }, "getPost");
 
 export async function publishPost(author: string, content: string, replyingTo?: string): Promise<string> {
-    const { privateKeyRaw } = await init;
+    const root = await init;
 
     const pow = await import("./pow");
     const nonce = await pow.default(
@@ -84,7 +73,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
     );
 
     // assume low entropy because why not
-    const pbkdf2Data = await window.crypto.subtle.importKey("raw", privateKeyRaw, "PBKDF2", false, ["deriveBits"]);
+    const pbkdf2Data = await window.crypto.subtle.importKey("raw", root, "PBKDF2", false, ["deriveBits"]);
 
     const privateKey = await window.crypto.subtle
         .deriveBits(
