@@ -9,7 +9,7 @@ import markedKatex from "marked-katex-extension";
 marked.use(markedKatex());
 
 const Markdown: Component<{ value: string }> = props => {
-    return <div style={style.markdown}>{parse(marked.lexer(props.value))}</div>;
+    return <div class={style.markdown}>{parse(marked.lexer(props.value))}</div>;
 };
 
 export default Markdown;
