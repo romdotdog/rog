@@ -14,14 +14,16 @@ if ((import.meta as any).env.DEV && !(root instanceof HTMLElement)) {
 }
 
 const App = lazy(() => import("./App"));
-const ArticleView = lazy(() => import("./ArticleView"));
+const About = lazy(() => import("./About"));
+const ArticleLoader = lazy(() => import("./ArticleLoader"));
 
 render(
     () => (
         <Router>
             <Route path="/" component={wrapPush(App)} />
-            <Route path="/:hash" component={wrapPush(ArticleView)}  />
+            <Route path="/about" component={wrapPush(About)} />
+            <Route path="/:hash" component={wrapPush(ArticleLoader)} />
         </Router>
     ),
-    root!,
+    root!
 );

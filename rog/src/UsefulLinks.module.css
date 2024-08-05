@@ -1,4 +1,6 @@
 .container {
+    display: flex;
+    gap: 20px;
     color: #a0a0a0;
     font-size: 0.79rem;
 }

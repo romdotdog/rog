@@ -8,42 +8,40 @@ import Markdown from "./Markdown";
 import PostForm from "./PostForm";
 import ReplyingTo from "./ReplyingTo";
 
-const ArticleView: Component = () => {
-    const params = useParams();
+interface Props {
+    hash?: string;
+    title: string;
+    content: string;
+    author: string;
+    replyingTo?: string;
+    replyingToPreview?: string;
+    keyChecksum?: string;
+    participating?: number;
+    timestamp: number;
+}
+
+const ArticleView: Component<Props> = post => {
     const navigate = useNavigate();
     const location = useLocation<{ back: boolean }>();
-    const goBack = () => location.state?.back ? navigate(-1) : navigate("/", { state: { back: true } });
+    const goBack = () => (location.state?.back ? navigate(-1) : navigate("/", { state: { back: true } }));
 
-    const post = createAsync(() => 
-        getPost(params.hash).then(post => {
-            console.log(post);
-            const [title, content] = splitTitle(post.content);
-            return {
-                title,
-                content,
-                author: post.author,
-                replyingTo: post.replyingTo && toHex(post.replyingTo),
-                replyingToPreview: post.replyingToPreview,
-                keyChecksum: formatKey(post.key.slice(0, 4)),
-                timestamp: post.timestamp,
-                participating: post.participating
-            };
-        })
-    );
-    
     return (
-        <Show when={post()} fallback={<p>loading...</p>}>
-            <div class={style.container}>
-                <a onClick={goBack} href="#" class={style.back}>
-                    ⟵ back
-                </a>
-                <h1 class={style.title}>{post()!.title}</h1>
-                {post()!.replyingTo && <ReplyingTo replyingTo={post()!.replyingTo!} replyingToPreview={post()!.replyingToPreview!} /> }
-                <Author timestamp={post()!.timestamp} author={post()!.author} keyChecksum={post()!.keyChecksum} participating={post()!.participating} class={style.author} />
-                <Markdown value={post()!.content} />
-                <PostForm actionName="Reply" replyingTo={params.hash} />
-            </div>
-        </Show>
+        <div class={style.container}>
+            <a onClick={goBack} href="#" class={style.back}>
+                ⟵ back
+            </a>
+            <h1 class={style.title}>{post.title}</h1>
+            {post.replyingTo && <ReplyingTo replyingTo={post.replyingTo} replyingToPreview={post.replyingToPreview!} />}
+            <Author
+                timestamp={post.timestamp}
+                author={post.author}
+                keyChecksum={post.keyChecksum}
+                participating={post.participating}
+                class={style.author}
+            />
+            <Markdown value={post.content} />
+            {post.hash && <PostForm actionName="Reply" replyingTo={post.hash} />}
+        </div>
     );
 };
 
