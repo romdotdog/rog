@@ -3,6 +3,7 @@ CREATE TABLE posts (
     author TEXT NOT NULL,
     content TEXT NOT NULL,
     preview TEXT NOT NULL,
+    keyChecksum BLOB NOT NULL,
     key BLOB NOT NULL,
     signature BLOB NOT NULL,
     timestamp INTEGER NOT NULL,
@@ -16,19 +17,33 @@ FOR EACH ROW
 WHEN NEW.replyingTo IS NOT NULL
 BEGIN
     UPDATE posts
-    SET participating = participating + 1
+    SET participating = (
+        WITH RECURSIVE Descendants AS (
+            SELECT p.key, p.hash
+            FROM posts p
+            WHERE p.hash = posts.hash
+            
+            UNION ALL
+            
+            SELECT p.key, p.hash
+            FROM posts p
+            INNER JOIN Descendants d ON p.replyingTo = d.hash
+        )
+        SELECT COUNT(DISTINCT d.key)
+        FROM Descendants d
+    )
     WHERE hash IN (
         WITH RECURSIVE Ancestors AS (
-            SELECT replyingTo
+            SELECT replyingTo, hash
             FROM posts
             WHERE hash = NEW.hash
-
+            
             UNION ALL
-
-            SELECT p.replyingTo
+            
+            SELECT p.replyingTo, p.hash
             FROM posts p
             INNER JOIN Ancestors a ON p.hash = a.replyingTo
         )
-        SELECT replyingTo FROM Ancestors
+        SELECT hash FROM Ancestors
     );
 END;

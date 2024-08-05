@@ -241,7 +241,7 @@ async function handleSubmit(request: Request, env: Env) {
     // Save post to DB
     await env.DB.prepare(
         `INSERT OR IGNORE INTO posts (hash, author, content, preview, key, signature, timestamp, replyingTo)
-		            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
     )
         .bind(hashBin, author, content, preview, decodedData.key, decodedData.signature, timestamp, decodedData.replyingTo ?? null)
         .run();
