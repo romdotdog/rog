@@ -133,3 +133,12 @@ export async function publishPost(author: string, content: string, replyingTo?: 
 
     return toHex(new Uint8Array(await r.arrayBuffer()));
 }
+
+export async function subUnsubNotifications(token: string, subscribe: boolean) {
+    const r = await fetch(`${backend}/${subscribe ? "subscribe" : "unsubscribe"}`, {
+        method: "POST",
+        body: token,
+    });
+
+    return r.ok;
+}

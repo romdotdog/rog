@@ -20,14 +20,12 @@ BEGIN
     SET participating = participating + 1
     WHERE hash IN (
         WITH RECURSIVE Ancestors AS (
-            -- Start with the initial post (the one just inserted)
             SELECT replyingTo
             FROM posts
             WHERE hash = NEW.hash
 
             UNION ALL
 
-            -- Recursively select the ancestors
             SELECT p.replyingTo
             FROM posts p
             INNER JOIN Ancestors a ON p.hash = a.replyingTo

@@ -8,3 +8,7 @@ compatibility_flags = ["nodejs_compat"]
 binding = "DB"
 database_name = "rog"
 database_id = "0d395f94-86cf-468d-b9de-050e8266255e"
+
+[[kv_namespaces]]
+binding = "cache"
+id = "3e3d4a0588844e4385da9c7abf08e107"

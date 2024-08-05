@@ -6,7 +6,7 @@ import PostForm from "./PostForm";
 import style from "./App.module.css";
 import { createAsync } from "@solidjs/router";
 import { getFeed } from "./API";
-import { formatKey, splitTitle, toHex } from "./utils";
+import { formatKey, toHex } from "./utils";
 
 const App: Component = () => {
     const feed = createAsync(() => getFeed().then(r => (console.log(r), r)));

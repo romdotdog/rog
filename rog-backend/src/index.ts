@@ -31,6 +31,10 @@ export default {
             return handleGetPost(env, postId);
         } else if (path === "/submit" && request.method === "POST") {
             return handleSubmit(request, env);
+        } else if (path === "/subscribe" && request.method === "POST") {
+            return handleSubUnsub(request, env, true);
+        } else if (path === "/unsubscribe" && request.method === "POST") {
+            return handleSubUnsub(request, env, false);
         } else {
             return new Response("not found", { status: 404, headers });
         }
@@ -253,7 +257,137 @@ async function handleSubmit(request: Request, env: Env) {
         )
         .run();
 
+    const serviceAccount = JSON.parse(env.SERVICE_ACCOUNT);
+    const token = await createToken(serviceAccount, "https://fcm.googleapis.com/");
+    const response = await fetch(`https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            message: {
+                data: {
+                    hash: Buffer.from(hashBin).toString("hex"),
+                },
+                notification: {
+                    body: `New rog post from ${author}`,
+                    title: preview,
+                },
+                topic: "all",
+            },
+        }),
+    });
+
+    if (!response.ok) {
+        console.error(response.status, await response.text());
+    }
+
     return new Response(hashBin, { headers: msgpack });
+}
+
+async function handleSubUnsub(request: Request, env: Env, subscribe: boolean) {
+    const token = await request.text();
+    const serviceAccount = JSON.parse(env.SERVICE_ACCOUNT);
+    const auth = await authToken(env, serviceAccount);
+
+    const r = await fetch(`https://iid.googleapis.com/iid/v1:batch${subscribe ? "Add" : "Remove"}`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${auth}`,
+            access_token_auth: "true",
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            to: "/topics/all",
+            registration_tokens: [token],
+        }),
+    });
+
+    return new Response(null, { headers, status: r.ok ? 200 : 500 });
+}
+
+async function createToken(serviceAccount: any, aud: string, scope?: string) {
+    // fetch the part of the PEM string between header and footer
+    const pemHeader = "-----BEGIN PRIVATE KEY-----";
+    const pemFooter = "-----END PRIVATE KEY-----";
+    const pem = serviceAccount.private_key;
+    const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length - 1);
+    // base64 decode the string to get the binary data
+    const binaryDer = Buffer.from(pemContents, "base64");
+
+    const privateKey = await crypto.subtle.importKey(
+        "pkcs8",
+        binaryDer,
+        {
+            name: "RSASSA-PKCS1-v1_5",
+            hash: {
+                name: "SHA-256",
+            },
+        },
+        false,
+        ["sign"]
+    );
+
+    const header = Buffer.from(
+        JSON.stringify({
+            alg: "RS256",
+            typ: "JWT",
+            kid: serviceAccount.private_key_id,
+        })
+    ).toString("base64url");
+
+    const iat = Math.floor(Date.now() / 1000);
+    const exp = iat + 3600;
+
+    const payload = Buffer.from(
+        JSON.stringify({
+            iss: serviceAccount.client_email,
+            sub: serviceAccount.client_email,
+            aud,
+            ...(scope ? { scope } : {}),
+            exp,
+            iat,
+        })
+    ).toString("base64url");
+
+    const textEncoder = new TextEncoder();
+    const inputArrayBuffer = textEncoder.encode(`${header}.${payload}`);
+    const outputArrayBuffer = await crypto.subtle.sign({ name: "RSASSA-PKCS1-v1_5" }, privateKey, inputArrayBuffer);
+    const signature = Buffer.from(outputArrayBuffer).toString("base64url");
+
+    return `${header}.${payload}.${signature}`;
+}
+
+async function authToken(env: Env, serviceAccount: any) {
+    const cachedRaw = await env.cache.get("authToken", "arrayBuffer");
+    if (cachedRaw) {
+        const cached = decode(cachedRaw) as any;
+        if (Date.now() < cached.expires) {
+            return cached.token;
+        }
+    }
+
+    const jwt = await createToken(serviceAccount, "https://oauth2.googleapis.com/token", "https://www.googleapis.com/auth/cloud-platform");
+    const response = await fetch("https://oauth2.googleapis.com/token", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Cache-Control": "no-cache",
+            Host: "oauth2.googleapis.com",
+        },
+        body: "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" + jwt,
+    });
+
+    // Grab the JSON from the response
+    const oauth = (await response.json()) as any;
+    const token = oauth.access_token;
+
+    if (token) {
+        await env.cache.put("authToken", encode({ token, expires: Date.now() + oauth.expires_in * 1000 }));
+    }
+
+    return oauth.access_token;
 }
 
 export function splitTitle(post: string) {
