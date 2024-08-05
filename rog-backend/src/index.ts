@@ -46,7 +46,7 @@ async function handleFeed(env: Env) {
         `SELECT 
             p.hash, 
             p.author, 
-            p.keyChecksum, 
+            substr(p.key, 2, 5) AS keyChecksum, 
             p.preview, 
             p.timestamp,
             p.replyingTo,
@@ -234,27 +234,16 @@ async function handleSubmit(request: Request, env: Env) {
     };
 
     const hashBin = await crypto.subtle.digest("SHA-256", encode(postWithMetadata));
-    const keyChecksum = decodedData.key.slice(0, 4);
 
     const r = /^[^#\s](?:.{0,499}?\n|.{499})/m.exec(decodedData.content);
     const preview = decodedData.content.substring(0, r ? r.index + r[0].length : 500).trim();
 
     // Save post to DB
     await env.DB.prepare(
-        `INSERT OR IGNORE INTO posts (hash, author, content, preview, keyChecksum, key, signature, timestamp, replyingTo)
+        `INSERT OR IGNORE INTO posts (hash, author, content, preview, key, signature, timestamp, replyingTo)
 		            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
-        .bind(
-            hashBin,
-            author,
-            content,
-            preview,
-            keyChecksum,
-            decodedData.key,
-            decodedData.signature,
-            timestamp,
-            decodedData.replyingTo ?? null
-        )
+        .bind(hashBin, author, content, preview, decodedData.key, decodedData.signature, timestamp, decodedData.replyingTo ?? null)
         .run();
 
     const serviceAccount = JSON.parse(env.SERVICE_ACCOUNT);
