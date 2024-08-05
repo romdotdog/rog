@@ -24,6 +24,6 @@ export function glow(participating: number, timestamp: number) {
     const now = Date.now();
     const hoursSince = (now - timestamp) / 1000 / 60 / 60;
     const exp = Math.exp(-hoursSince / 5);
-    const strength = Math.min(1, (participating * exp) / 4);
-    return `text-shadow: 0 0 rgba(255, 255, 255, ${strength});`;
+    const strength = Math.min(1, (participating * exp) / 6);
+    return `text-shadow: rgba(255, 255, 255, ${strength}) 0 0 10px;`;
 }
