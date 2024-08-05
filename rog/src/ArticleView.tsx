@@ -3,7 +3,7 @@ import style from "./ArticleView.module.css";
 import Author from "./Author";
 import { createAsync, useLocation, useNavigate, useParams } from "@solidjs/router";
 import { getPost } from "./API";
-import { formatKey, fromHex, splitTitle, toHex } from "./utils";
+import { formatKey, fromHex, glow, splitTitle, toHex } from "./utils";
 import Markdown from "./Markdown";
 import PostForm from "./PostForm";
 import ReplyingTo from "./ReplyingTo";
@@ -30,7 +30,9 @@ const ArticleView: Component<Props> = post => {
             <a onClick={goBack} href="#" class={style.back}>
                 ⟵ back
             </a>
-            <h1 class={style.title}>{post.title}</h1>
+            <h1 class={style.title} style={post.participating ? glow(post.participating, post.timestamp) : ""}>
+                {post.title}
+            </h1>
             {post.replyingTo && <ReplyingTo replyingTo={post.replyingTo} replyingToPreview={post.replyingToPreview!} />}
             <Author
                 timestamp={post.timestamp}
