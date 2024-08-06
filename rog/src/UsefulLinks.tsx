@@ -9,6 +9,7 @@ const UsefulLinks: Component = () => {
             <A href="/about">about</A>
             <SubUnsub />
             <a href="https://github.com/users/romdotdog/projects/6">roadmap</a>
+            <A href="/thanks">thanks</A>
         </div>
     );
 };
