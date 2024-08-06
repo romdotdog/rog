@@ -1,9 +1,8 @@
-import { Show, type Component } from "solid-js";
+import { type Component } from "solid-js";
 import style from "./ArticleView.module.css";
 import Author from "./Author";
-import { createAsync, useLocation, useNavigate, useParams } from "@solidjs/router";
-import { getPost } from "./API";
-import { formatKey, fromHex, glow, splitTitle, toHex } from "./utils";
+import { useLocation, useNavigate } from "@solidjs/router";
+import { glow } from "./utils";
 import Markdown from "./Markdown";
 import PostForm from "./PostForm";
 import ReplyingTo from "./ReplyingTo";

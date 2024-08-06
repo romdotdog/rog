@@ -25,5 +25,5 @@ render(
             <Route path="/:hash" component={wrapPush(ArticleLoader)} />
         </Router>
     ),
-    root!
+    root!,
 );

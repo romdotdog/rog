@@ -21,13 +21,15 @@ const SubUnsub: Component = () => {
         }
         setLoading(false);
         setSubscribed(getSaved());
-    }
+    };
 
     return (
         <Show when={notifsAvailable}>
-            <A href="#" onClick={subUnsub}>{loading() ? "loading..." : (subscribed() ? "unsubscribe" : "subscribe")}</A>
+            <A href="#" onClick={subUnsub}>
+                {loading() ? "loading..." : subscribed() ? "unsubscribe" : "subscribe"}
+            </A>
         </Show>
     );
-}
+};
 
-export default SubUnsub
+export default SubUnsub;

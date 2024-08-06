@@ -69,7 +69,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
         encode({
             author,
             content,
-        })
+        }),
     );
 
     // assume low entropy because why not
@@ -84,7 +84,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
                 hash: "SHA-256",
             },
             pbkdf2Data,
-            256
+            256,
         )
         .then(importRawPrivateKey);
 
@@ -99,7 +99,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
             author,
             content,
             nonce,
-        })
+        }),
     );
 
     const body = encode({

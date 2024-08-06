@@ -69,7 +69,11 @@ export function parse(tokens: Token[]): JSX.Element {
             }
 
             case "code": {
-                return <pre><code class={token.lang}>{token.text}</code></pre>;
+                return (
+                    <pre>
+                        <code class={token.lang}>{token.text}</code>
+                    </pre>
+                );
             }
 
             case "blockKatex": {
@@ -93,15 +97,20 @@ export function parse(tokens: Token[]): JSX.Element {
                 const bodyChildren = tableToken.rows.map(row => {
                     const rowChildren = row.map((cell, index) => {
                         // align={token.align[index]}
-                        return <td>{parseInline(cell.tokens)}</td>
+                        return <td>{parseInline(cell.tokens)}</td>;
                     });
 
-                    return <tr>{rowChildren}</tr>
+                    return <tr>{rowChildren}</tr>;
                 });
 
                 const body = <tbody>{bodyChildren}</tbody>;
 
-                return <table>{header}{body}</table>;
+                return (
+                    <table>
+                        {header}
+                        {body}
+                    </table>
+                );
             }
 
             case "hr": {
@@ -128,7 +137,7 @@ export function parseInline(tokens: Token[] = []): JSX.Element {
             }
 
             case "em": {
-                return <em>{parseInline(token.tokens)}</em>
+                return <em>{parseInline(token.tokens)}</em>;
             }
 
             case "del": {
@@ -151,7 +160,7 @@ export function parseInline(tokens: Token[] = []): JSX.Element {
                 return <img src={token.href} alt={unescape(token.text)} title={unescape(token.title)} />;
             }
 
-            case "escape": 
+            case "escape":
             case "html": {
                 return token.text;
             }
@@ -169,26 +178,26 @@ export function parseInline(tokens: Token[] = []): JSX.Element {
 }
 
 const htmlUnescapes: Record<string, string> = {
-    '&amp;': '&',
-    '&lt;': '<',
-    '&gt;': '>',
-    '&quot;': '"',
-    '&#39;': "'",
+    "&amp;": "&",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&quot;": '"',
+    "&#39;": "'",
 };
-  
+
 /** Used to match HTML entities and HTML characters. */
 const reEscapedHtml = /&(?:amp|lt|gt|quot|#(?:0+)?39);/g;
 const reHasEscapedHtml = RegExp(reEscapedHtml.source);
 
-export const unescape = (str = '') => {
-    return reHasEscapedHtml.test(str) ? str.replace(reEscapedHtml, (entity) => htmlUnescapes[entity] || "'") : str;
+export const unescape = (str = "") => {
+    return reHasEscapedHtml.test(str) ? str.replace(reEscapedHtml, entity => htmlUnescapes[entity] || "'") : str;
 };
 
 function join(path: string, base?: string) {
     if (!base) {
         return path;
     }
-  
+
     try {
         return new URL(path, base).href;
     } catch {

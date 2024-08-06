@@ -18,11 +18,11 @@ const ArticleLoader: Component = () => {
                 author: post.author,
                 replyingTo: post.replyingTo && toHex(post.replyingTo),
                 replyingToPreview: post.replyingToPreview,
-                keyChecksum: formatKey(post.key.slice(0, 4)),
+                keyChecksum: formatKey(post.key.slice(0, 5)),
                 timestamp: post.timestamp,
                 participating: post.participating,
             };
-        })
+        }),
     );
 
     return (

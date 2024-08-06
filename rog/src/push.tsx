@@ -38,7 +38,7 @@ if (notifsAvailable) {
 export const wrapPush: <T>(component: Component<T>) => Component<T> = component => props => {
     navigate = useNavigate();
     return component(props);
-}
+};
 
 export async function toggleSubscription() {
     if (registration === undefined || messaging === undefined) {

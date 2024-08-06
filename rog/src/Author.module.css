@@ -21,9 +21,9 @@
 }
 
 .dot {
-    padding: 0 .5em;
+    padding: 0 0.5em;
 }
 
 .dot::after {
-    content: '\00B7'
+    content: "\00B7";
 }
