@@ -35,8 +35,25 @@ if (notifsAvailable) {
     });
 }
 
+export function isSubscribed() {
+    return localStorage.getItem("subscribed") === "true";
+}
+
+async function ensureNotifications() {
+    if (Notification.permission !== "granted") {
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") {
+            return false;
+        }
+    }
+    return true;
+}
+
 export const wrapPush: <T>(component: Component<T>) => Component<T> = component => props => {
     navigate = useNavigate();
+    if (isSubscribed()) {
+        ensureNotifications();
+    }
     return component(props);
 };
 
@@ -50,11 +67,11 @@ export async function toggleSubscription() {
         return console.warn("missing VAPID_PUBKEY env variable");
     }
 
-    if (Notification.permission === "denied") {
-        return console.warn("notification permission denied");
+    if (!ensureNotifications()) {
+        return console.warn("notifications not available");
     }
 
-    const subscribed = localStorage.getItem("subscribed") === "true";
+    const subscribed = isSubscribed();
     try {
         const token = await getToken(messaging, {
             vapidKey,

@@ -1,13 +1,9 @@
 import { createSignal, Show, type Component } from "solid-js";
 import { A } from "@solidjs/router";
-import { notifsAvailable, toggleSubscription } from "./push";
-
-function getSaved() {
-    return localStorage.getItem("subscribed") === "true";
-}
+import { isSubscribed, notifsAvailable, toggleSubscription } from "./push";
 
 const SubUnsub: Component = () => {
-    const [subscribed, setSubscribed] = createSignal(getSaved());
+    const [subscribed, setSubscribed] = createSignal(isSubscribed());
     const [loading, setLoading] = createSignal(false);
 
     const subUnsub = async () => {
@@ -20,7 +16,7 @@ const SubUnsub: Component = () => {
             console.error("push subscription failed:", e);
         }
         setLoading(false);
-        setSubscribed(getSaved());
+        setSubscribed(isSubscribed());
     };
 
     return (

@@ -178,8 +178,6 @@ async function handleSubmit(request: Request, env: Env) {
         return new Response("title is too long", { status: 400, headers });
     }
 
-    // TODO: check if title is too long
-
     const signedBuffer = encode({
         author,
         content,
