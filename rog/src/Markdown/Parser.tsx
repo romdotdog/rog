@@ -159,7 +159,7 @@ export function parseInline(tokens: Token[] = []): JSX.Element {
             case "image": {
                 return (
                     <img
-                        src={`//wsrv.nl/?url=${encodeURIComponent(token.href)}`}
+                        src={`//wsrv.nl/?url=${encodeURIComponent(token.href)}&n=-1`}
                         alt={unescape(token.text)}
                         title={unescape(token.title)}
                     />
