@@ -7,17 +7,21 @@
         "start": "vite",
         "dev": "vite --host",
         "build": "vite build",
-        "serve": "vite preview"
+        "serve": "vite preview --host --port 3000"
     },
     "license": "MIT",
     "devDependencies": {
         "@types/elliptic": "^6.4.18",
+        "@types/katex": "^0.16.7",
         "solid-devtools": "^0.29.2",
         "typescript": "^5.3.3",
         "vite": "^5.0.11",
         "vite-plugin-solid": "^2.8.2"
     },
     "dependencies": {
+        "@fontsource/cormorant-garamond": "^5.0.13",
+        "@fontsource/eb-garamond": "^5.0.18",
+        "@fontsource/source-code-pro": "^5.0.18",
         "@msgpack/msgpack": "^3.0.0-beta2",
         "@solidjs/router": "^0.14.1",
         "dayjs": "^1.11.12",
@@ -25,7 +29,6 @@
         "firebase": "^10.12.5",
         "katex": "^0.16.11",
         "marked": "^13.0.3",
-        "marked-katex-extension": "^5.1.0",
         "solid-js": "^1.8.11"
     }
 }

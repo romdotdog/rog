@@ -1,7 +1,8 @@
-import katex from "katex";
 import type { Token, Tokens } from "marked";
-import { JSX } from "solid-js";
-import { BlockMath, InlineMath } from "./KaTeX";
+import { JSX, lazy, Suspense } from "solid-js";
+
+const BlockMath = lazy(() => import("./KaTeX").then(d => ({ default: d.BlockMath })));
+const InlineMath = lazy(() => import("./KaTeX").then(d => ({ default: d.InlineMath })));
 
 export function parse(tokens: Token[]): JSX.Element {
     return tokens.map(token => {

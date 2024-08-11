@@ -8,6 +8,10 @@ export function splitTitle(post: string): [string | null, string] {
     return [null, post];
 }
 
+export function addEllipsis(content: string) {
+    return content.replace(/(\$)?\.*$/, (match, dollarSign) => (dollarSign ? "$ …" : "…"));
+}
+
 export function formatKey(key: Uint8Array) {
     return toHex(key).slice(2, 9);
 }

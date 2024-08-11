@@ -4,7 +4,7 @@ import Author from "./Author";
 import { useNavigate } from "@solidjs/router";
 import Markdown from "./Markdown";
 import ReplyingTo from "./ReplyingTo";
-import { glow, splitTitle } from "./utils";
+import { addEllipsis, glow, splitTitle } from "./utils";
 
 const ArticlePreview: Component<{
     preview: string;
@@ -36,7 +36,7 @@ const ArticlePreview: Component<{
                     participating={props.participating}
                     class=""
                 />
-                <Markdown value={content.replace(/\.*$/, "…")} />
+                <Markdown value={addEllipsis(content)} />
             </div>
         </article>
     );

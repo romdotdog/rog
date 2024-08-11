@@ -1,14 +1,7 @@
 import { cache } from "@solidjs/router";
 import { encode, decode } from "@msgpack/msgpack";
 import { fromHex, toHex } from "./utils";
-import {
-    derivePublicKey,
-    exportRawPrivateKey,
-    exportRawPublicKey,
-    generateKeyPair,
-    importPKCS8PrivateKey,
-    importRawPrivateKey,
-} from "./Crypto";
+import { derivePublicKey, exportRawPublicKey, importRawPrivateKey } from "./Crypto";
 
 const backend = import.meta.env.VITE_BACKEND;
 if (!backend) {
@@ -69,7 +62,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
         encode({
             author,
             content,
-        }),
+        })
     );
 
     // assume low entropy because why not
@@ -84,7 +77,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
                 hash: "SHA-256",
             },
             pbkdf2Data,
-            256,
+            256
         )
         .then(importRawPrivateKey);
 
@@ -99,7 +92,7 @@ export async function publishPost(author: string, content: string, replyingTo?: 
             author,
             content,
             nonce,
-        }),
+        })
     );
 
     const body = encode({
