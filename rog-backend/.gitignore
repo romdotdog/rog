@@ -1,6 +1,6 @@
 service_account.json
-prewipe.sql
-command.sql
+*.sql
+!schema.sql
 
 # Logs
 
