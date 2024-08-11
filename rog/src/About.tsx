@@ -16,7 +16,7 @@ When you submit a post, your browser performs some additional computational effo
 
 ## Notifications for Brave
 
-If you are using the Brave browser and encounter issues with the subscribe button, go to \`brave://settings/privacy\` and turn off the "Use Google services for push messaging" setting.
+If you are using the Brave browser and encounter issues with the subscribe button, go to \`brave://settings/privacy\` and turn on the "Use Google services for push messaging" setting.
 `;
 
 const About: Component = () => {
