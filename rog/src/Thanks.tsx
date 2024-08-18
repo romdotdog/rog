@@ -5,6 +5,7 @@ const content = `
 -   doggy for exploiting a bug that I had already fixed, but not pushed
 -   fabricio for testing my markdown
 -   joshA for urging me to add an autosave feature
+-   alex for making the precursor to rog
 -   you for visiting rog
 `;
 
